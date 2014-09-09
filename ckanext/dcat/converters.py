@@ -31,7 +31,7 @@ def dcat_to_ckan(dcat_dict):
 
     package_dict['extras'].append({
         'key': 'language',
-        'value': ','.join(dcat_dict.get('language', []))
+        'value': dcat_dict.get('language', [])
     })
 
     package_dict['resources'] = []
@@ -40,7 +40,8 @@ def dcat_to_ckan(dcat_dict):
             'name': distribution.get('title'),
             'description': distribution.get('description'),
             'url': distribution.get('downloadURL') or distribution.get('accessURL'),
-            'format': distribution.get('format'),
+            #format is changed to mediaType
+            'format': distribution.get('mediaType').split('/')[-1],
         }
 
         if distribution.get('byteSize'):
