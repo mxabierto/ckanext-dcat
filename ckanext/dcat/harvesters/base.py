@@ -210,7 +210,7 @@ class DCATHarvester(HarvesterBase):
 
             if not content:
                 self._save_gather_error("No content loco", harvest_job)
-                return None
+                break
 
 
             try:
