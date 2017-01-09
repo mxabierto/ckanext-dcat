@@ -207,8 +207,10 @@ class DCATHarvester(HarvesterBase):
                     raise
 
             if not content:
-                break
-
+                if page == 1:
+                    return None
+                else:
+                    break
 
             try:
 
