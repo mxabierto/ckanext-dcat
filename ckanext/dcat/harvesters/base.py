@@ -89,6 +89,8 @@ class DCATHarvester(HarvesterBase):
             if content_type is None and r.headers.get('content-type'):
                 content_type = r.headers.get('content-type').split(";", 1)[0]
 
+            self._save_gather_error("Salida de _get_content_and_type", harvest_job)
+            self._save_gather_error(content, harvest_job)
             return content, content_type
 
         except requests.exceptions.HTTPError, error:
@@ -207,6 +209,7 @@ class DCATHarvester(HarvesterBase):
                     raise
 
             if not content:
+                self._save_gather_error("No content loco", harvest_job)
                 return None
 
 
