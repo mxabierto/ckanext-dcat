@@ -212,41 +212,41 @@ class DCATHarvester(HarvesterBase):
                 else:
                     break
 
-            try:
+            # try:
 
-                batch_guids = []
-                for guid, as_string in self._get_guids_and_datasets(content):
+            batch_guids = []
+            for guid, as_string in self._get_guids_and_datasets(content):
 
-                    log.debug('Got identifier: {0}'.format(guid.encode('utf8')))
-                    batch_guids.append(guid)
+                log.debug('Got identifier: {0}'.format(guid.encode('utf8')))
+                batch_guids.append(guid)
 
-                    if guid not in previous_guids:
+                if guid not in previous_guids:
 
-                        if guid in guids_in_db:
-                            # Dataset needs to be udpated
-                            obj = HarvestObject(guid=guid, job=harvest_job,
-                                            package_id=guid_to_package_id[guid],
-                                            content=as_string,
-                                            extras=[HarvestObjectExtra(key='status', value='change')])
-                        else:
-                            # Dataset needs to be created
-                            obj = HarvestObject(guid=guid, job=harvest_job,
-                                            content=as_string,
-                                            extras=[HarvestObjectExtra(key='status', value='new')])
-                        obj.save()
-                        ids.append(obj.id)
+                    if guid in guids_in_db:
+                        # Dataset needs to be udpated
+                        obj = HarvestObject(guid=guid, job=harvest_job,
+                                        package_id=guid_to_package_id[guid],
+                                        content=as_string,
+                                        extras=[HarvestObjectExtra(key='status', value='change')])
+                    else:
+                        # Dataset needs to be created
+                        obj = HarvestObject(guid=guid, job=harvest_job,
+                                        content=as_string,
+                                        extras=[HarvestObjectExtra(key='status', value='new')])
+                    obj.save()
+                    ids.append(obj.id)
 
-                if len(batch_guids) > 0:
-                    guids_in_source.extend(set(batch_guids) - set(previous_guids))
-                else:
-                    log.debug('Empty document, no more records')
-                    # Empty document, no more ids
-                    break
+            if len(batch_guids) > 0:
+                guids_in_source.extend(set(batch_guids) - set(previous_guids))
+            else:
+                log.debug('Empty document, no more records')
+                # Empty document, no more ids
+                break
 
-            except ValueError, e:
-                msg = 'Error parsing file: {0}'.format(str(e))
-                self._save_gather_error(msg, harvest_job)
-                return None
+            # except ValueError, e:
+            #     msg = 'Error parsing file: {0}'.format(str(e))
+            #     self._save_gather_error(msg, harvest_job)
+            #     return None
 
             if sorted(previous_guids) == sorted(batch_guids):
                 # Server does not support pagination or no more pages
