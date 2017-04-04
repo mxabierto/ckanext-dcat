@@ -34,7 +34,7 @@ def dcat_to_ckan(dcat_dict):
         'value': ','.join(dcat_dict.get('language', []))
     })
 
-    package_dict['extras'].update(dcat_dict['extras'])
+    package_dict['extras'].update(dcat_dict.get('extras', {}))
 
     package_dict['resources'] = []
     for distribution in dcat_dict.get('distribution', []):
