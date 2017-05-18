@@ -317,6 +317,7 @@ class DCATHarvester(HarvesterBase):
 
         package_dict, dcat_dict = self._get_package_dict(harvest_object)
 
+        log.info('hola!!')
         log.info(package_dict)
         if not package_dict:
             return False
