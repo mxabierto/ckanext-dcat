@@ -368,7 +368,7 @@ class DCATHarvester(HarvesterBase):
             try:
                 package_id = p.toolkit.get_action('package_create')(context, package_dict)
                 log.info('Created dataset with id %s', package_id)
-            except Error, e:
+            except Exception, e:
                 log.debug('Error: {0}'.format(e))
         elif status == 'change':
 
