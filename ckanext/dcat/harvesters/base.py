@@ -346,8 +346,6 @@ class DCATHarvester(HarvesterBase):
         }
 
         if status == 'new':
-
-
             package_schema = logic.schema.default_create_package_schema()
             context['schema'] = package_schema
 
@@ -365,8 +363,11 @@ class DCATHarvester(HarvesterBase):
             model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
             model.Session.flush()
 
-            package_id = p.toolkit.get_action('package_create')(context, package_dict)
-            log.info('Created dataset with id %s', package_id)
+            try:
+                package_id = p.toolkit.get_action('package_create')(context, package_dict)
+                log.info('Created dataset with id %s', package_id)
+            except Error, e:
+                log.debug('Error: {0}'.format(e))
         elif status == 'change':
 
             package_dict['id'] = harvest_object.package_id
