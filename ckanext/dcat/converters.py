@@ -14,7 +14,7 @@ def dcat_to_ckan(dcat_dict):
 
     package_dict['tags'] = []
     for keyword in dcat_dict.get('keyword', []):
-        keyword = keyword.replace("'", "").replace('(', "").replace(')',"").encode('utf-8')
+        keyword = keyword.replace("'", "").replace('(', "").replace(')',"")
         package_dict['tags'].append({'name': keyword})
 
     package_dict['extras'] = []

@@ -365,11 +365,11 @@ class DCATHarvester(HarvesterBase):
             model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
             model.Session.flush()
 
-            try:
-                package_id = p.toolkit.get_action('package_create')(context, package_dict)
-                log.info('Created dataset with id %s', package_id)
-            except Exception, e:
-                log.debug('Error: {0}'.format(e))
+            package_id = p.toolkit.get_action('package_create')(context, package_dict)
+            #try:
+            #    log.info('Created dataset with id %s', package_id)
+            #except Exception, e:
+            #    log.debug('Error: {0}'.format(e))
         elif status == 'change':
 
             package_dict['id'] = harvest_object.package_id
