@@ -315,8 +315,9 @@ class DCATHarvester(HarvesterBase):
             previous_object.current = False
             previous_object.add()
 
-
         package_dict, dcat_dict = self._get_package_dict(harvest_object)
+
+        log.info(package_dict)
         if not package_dict:
             return False
 
