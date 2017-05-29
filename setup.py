@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.0.4'
+version = '0.0.6'
 
 setup(
     name='ckanext-dcat',
@@ -35,6 +35,7 @@ setup(
 
     # Test plugins
     test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
+    test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
