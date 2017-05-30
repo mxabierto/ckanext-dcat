@@ -217,7 +217,7 @@ class DCATHarvester(HarvesterBase):
 
             try:
                 batch_guids = []
-                self._save_gather_error(str(type(content)), harvest_job)
+                # self._save_gather_error(str(type(content)), harvest_job)
                 for guid, as_string in self._get_guids_and_datasets(content):
 
                     log.debug('Got identifier: {0}'.format(guid.encode('utf8')))
@@ -256,9 +256,7 @@ class DCATHarvester(HarvesterBase):
                 log.debug('Same content, no more pages')
                 break
 
-
             page = page + 1
-
             previous_guids = batch_guids
 
         # Check datasets that need to be deleted
@@ -367,8 +365,8 @@ class DCATHarvester(HarvesterBase):
                 package_id = p.toolkit.get_action('package_create')(context, package_dict)
             except Exception, error:
                 log.error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)))
-                self._save_object_error('Saving package error %s' % harvest_object.id,harvest_object, 'Import')
-                #self._save_gather_error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)), harvest_job)
+                error_str = 'Saving package error %s : {0}'.format(str(error))
+                self._save_object_error(error_str % harvest_object.id,harvest_object, 'Import')
                 return False
             #try:
             #    log.info('Created dataset with id %s', package_id)
