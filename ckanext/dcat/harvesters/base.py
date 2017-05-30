@@ -368,7 +368,7 @@ class DCATHarvester(HarvesterBase):
             except Exception, error:
                 log.error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)))
                 self._save_object_error('Saving package error %s' % harvest_object.id,harvest_object, 'Import')
-                self._save_gather_error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)))
+                #self._save_gather_error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)), harvest_job)
                 return False
             #try:
             #    log.info('Created dataset with id %s', package_id)
