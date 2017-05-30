@@ -317,8 +317,6 @@ class DCATHarvester(HarvesterBase):
 
         package_dict, dcat_dict = self._get_package_dict(harvest_object)
 
-        log.info('hola!!')
-        log.info(package_dict)
         if not package_dict:
             return False
 
@@ -368,7 +366,8 @@ class DCATHarvester(HarvesterBase):
             try:
                 package_id = p.toolkit.get_action('package_create')(context, package_dict)
             except Exception, error:
-                self._save_object_error('Saving package error {0} {1} : {2}'.format(harvest_object.id,harvest_object, error), 'Import')
+                log.error('Saving package error {0} {1} : {2}'.format(harvest_object.id, package_schema, str(error)))
+                # self._save_object_error(, 'Import')
                 return False
             #try:
             #    log.info('Created dataset with id %s', package_id)
