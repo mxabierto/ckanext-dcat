@@ -365,7 +365,11 @@ class DCATHarvester(HarvesterBase):
             model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
             model.Session.flush()
 
-            package_id = p.toolkit.get_action('package_create')(context, package_dict)
+            try:
+                package_id = p.toolkit.get_action('package_create')(context, package_dict)
+            except Exception, error:
+                self._save_object_error('Saving package error {0} {1} : {2}'.format(harvest_object.id,harvest_object, error), 'Import')
+                return False
             #try:
             #    log.info('Created dataset with id %s', package_id)
             #except Exception, e:
