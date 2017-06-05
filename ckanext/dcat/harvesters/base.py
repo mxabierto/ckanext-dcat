@@ -204,6 +204,7 @@ class DCATHarvester(HarvesterBase):
                         return None
                 else:
                     # This should never happen. Raising just in case.
+                    self._save_gather_error(str(error), harvest_job)
                     raise
 
             if not content:
@@ -217,7 +218,7 @@ class DCATHarvester(HarvesterBase):
 
             try:
                 batch_guids = []
-                self._save_gather_error(str(type(content)), harvest_job)
+                #self._save_gather_error(str(type(content)), harvest_job)
                 for guid, as_string in self._get_guids_and_datasets(content):
 
                     log.debug('Got identifier: {0}'.format(guid.encode('utf8')))
