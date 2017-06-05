@@ -208,6 +208,8 @@ class DCATHarvester(HarvesterBase):
                     raise
 
             if not content:
+                self._save_gather_error("No content!!", harvest_job)
+                self._save_gather_error(content, harvest_job)
                 if page > 1:
                     break
 
