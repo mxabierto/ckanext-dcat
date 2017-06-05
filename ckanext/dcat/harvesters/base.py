@@ -216,7 +216,7 @@ class DCATHarvester(HarvesterBase):
                 return None
 
             if content and "json" not in content_type:
-                self._save_gather_error("Mal content_type!! {0}".format(), harvest_job)
+                self._save_gather_error("Mal content_type!! {0}".format(content_type), harvest_job)
                 #self._save_gather_error(content, harvest_job)
                 break
 
