@@ -49,8 +49,7 @@ class DCATJSONHarvester(DCATHarvester):
 
         dcat_dict = json.loads(content)
 
-        log.debug("Vocabulario {0}".format(os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')))
-        vocabulary = os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
-        package_dict = converters.dcat_to_ckan(dcat_dict, vocabulary)
+        log.debug("Vocabulario {0}".format(self.vocabulary)
+        package_dict = converters.dcat_to_ckan(dcat_dict, self.vocabulary)
 
         return package_dict, dcat_dict

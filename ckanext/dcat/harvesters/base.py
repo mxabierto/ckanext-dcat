@@ -27,6 +27,7 @@ class DCATHarvester(HarvesterBase):
     force_import = False
 
     _user_name = None
+    vocabulary = os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
 
 
     def _get_content_and_type(self, url, harvest_job, page=1, content_type=None):
