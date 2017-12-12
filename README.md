@@ -18,6 +18,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
 - [RDF DCAT to CKAN dataset mapping](#rdf-dcat-to-ckan-dataset-mapping)
@@ -122,7 +123,7 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_date={date}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -163,7 +164,7 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 
     ckanext.dcat.datasets_per_page = 20
 
-The catalog endpoint also supports a `modified_date` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
+The catalog endpoint also supports a `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
 
 http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 
@@ -227,11 +228,34 @@ The harvester will look at the `content-type` HTTP header field to determine the
 
 *TODO*: configure profiles.
 
+
+### Transitive harvesting
+
+In transitive harvesting (i.e., when you harvest a catalog A, and a catalog X harvests your catalog), you may want to provide the original catalog info for each harvested dataset.
+
+By setting the configuration option `ckanext.dcat.expose_subcatalogs = True` in your ini file, you'll enable the storing and publication of the source catalog for each harvested dataset.
+
+The information contained in the harvested `dcat:Catalog` node will be stored as extras into the harvested datasets.
+When serializing, your Catalog will expose the harvested Catalog using the `dct:hasPart` relation. This means that your catalog will have this structure:
+- `dcat:Catalog` (represents your current catalog)
+  - `dcat:dataset` (1..n, the dataset created withing your catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of the harvested catalogs)
+        - `dcat:dataset` (dataset in the harvested catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of another harvester catalog)
+     ...   
+
+
 ### Extending the RDF harvester
 
 The DCAT RDF harvester has extension points that allow to modify its behaviour from other extensions. These can be used by extensions implementing
-the `IDCATRDFHarvester` interface. Right now it provides the `before_download` and `after_download` methods that are called just before and after
-retrieving the remote file, and can be used for instance to validate the contents.
+the `IDCATRDFHarvester` interface. Right now it provides the following methods:
+
+* `before_download` and `after_download`: called just before and after retrieving the remote file, and can be used for instance to validate the contents.
+* `update_session`: called before making the remote requests to update the `requests` session object, useful to add additional headers or for setting client certificates. Check the [`requests` documentation](http://docs.python-requests.org/en/master/user/advanced/#session-objects) for details.
+* `before_create` / `after_create`: called before and after the `package_create` action has been performed
+* `before_update` / `after_update`: called before and after the `package_update` action has been performed
 
 To know more about these methods, please check the source of [`ckanext-dcat/ckanext/dcat/interfaces.py`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/interfaces.py).
 
