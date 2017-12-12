@@ -49,7 +49,7 @@ class DCATJSONHarvester(DCATHarvester):
 
         dcat_dict = json.loads(content)
 
-        log.debug("Vocabulario {0}".format(self.vocabulary)
+        log.debug("Vocabulario {0}".format(self.vocabulary))
         package_dict = converters.dcat_to_ckan(dcat_dict, self.vocabulary)
 
         return package_dict, dcat_dict
