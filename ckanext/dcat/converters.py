@@ -1,5 +1,6 @@
 import os
 import logging
+from slugify import slugify
 
 log = logging.getLogger(__name__)
 
@@ -35,10 +36,10 @@ def dcat_to_ckan(dcat_dict):
 
     dcat_publisher = dcat_dict.get('publisher')
     if isinstance(dcat_publisher, basestring):
-        package_dict['owner_org'] = munge.munge_name(dcat_publisher)
+        package_dict['owner_org'] = slugify(dcat_publisher, max_length=100)
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher})
     elif isinstance(dcat_publisher, dict) and dcat_publisher.get('name'):
-        package_dict['owner_org'] = munge.munge_name(dcat_publisher.get('name'))
+        package_dict['owner_org'] = slugify(dcat_publisher.get('name'), max_length=100)
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher.get('name')})
         package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('mbox')})
         package_dict['extras'].append({'key': 'publisher_type', 'value': dcat_publisher.get('position')})
