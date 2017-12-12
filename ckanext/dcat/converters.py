@@ -17,8 +17,8 @@ def dcat_to_ckan(dcat_dict):
         keyword = keyword.replace("'", "").replace('(', "").replace(')',"").replace(',', '').replace('.', '').replace(';', '')
         package_dict['tags'].append({'name': keyword})
 
-    print os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
-    log.debug("Vocabulario ", os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120'))
+    # print os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
+    log.debug("Vocabulario {0}".format(os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')))
 
     # Nivel de gobierno por medio del vocabulario
     if dcat_dict.get('govType', False):
