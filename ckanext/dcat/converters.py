@@ -1,11 +1,10 @@
-import os
 import logging
 from slugify import slugify
 
 log = logging.getLogger(__name__)
 
 
-def dcat_to_ckan(dcat_dict):
+def dcat_to_ckan(dcat_dict, vocabulary):
     package_dict = {}
 
     package_dict['title'] = dcat_dict.get('title')
@@ -18,13 +17,12 @@ def dcat_to_ckan(dcat_dict):
         package_dict['tags'].append({'name': keyword})
 
     # print os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
-    log.debug("Vocabulario {0}".format(os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')))
 
     # Nivel de gobierno por medio del vocabulario
     if dcat_dict.get('govType', False):
         package_dict['tags'].append({
             'name': dcat_dict.get('govType').capitalize(),
-            'vocabulary_id': os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
+            'vocabulary_id': vocabulary
         })
 
     package_dict['gov_type'] = dcat_dict.get('govType').capitalize()
