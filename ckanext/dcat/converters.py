@@ -6,25 +6,25 @@ log = logging.getLogger(__name__)
 
 
 def dcat_to_ckan(dcat_dict):
-
     package_dict = {}
 
     package_dict['title'] = dcat_dict.get('title')
     package_dict['notes'] = dcat_dict.get('description')
     package_dict['url'] = dcat_dict.get('landingPage')
 
-
     package_dict['tags'] = []
     for keyword in dcat_dict.get('keyword', []):
         keyword = keyword.replace("'", "").replace('(', "").replace(')',"").replace(',', '').replace('.', '').replace(';', '')
         package_dict['tags'].append({'name': keyword})
 
+    print os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
     log.debug("Vocabulario ", os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120'))
-     # Nivel de gobierno por medio del vocabulario
+
+    # Nivel de gobierno por medio del vocabulario
     if dcat_dict.get('govType', False):
         package_dict['tags'].append({
             'name': dcat_dict.get('govType').capitalize(),
-            'vocabulary_id': os.environ.get('VOCABULARY_GOV_TYPE_ID', 'f4977b24-9d94-459a-9b91-4f6a0a270fab')
+            'vocabulary_id': os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
         })
 
     package_dict['gov_type'] = dcat_dict.get('govType').capitalize()
