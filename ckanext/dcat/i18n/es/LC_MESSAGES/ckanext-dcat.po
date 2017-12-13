@@ -126,3 +126,18 @@ msgstr "Derechos"
 msgid "Created"
 msgstr "Creado"
 
+#: ckanext/dcat/utils.py:57
+msgid "Issued"
+msgstr "Publicado"
+
+#: ckanext/dcat/utils.py:58
+msgid "Modified"
+msgstr "Modificado"
+
+#: ckanext/dcat/utils.py:59
+msgid "Publisher email"
+msgstr "Email del publicador"
+
+#: ckanext/dcat/utils.py:60
+msgid "Publisher name"
+msgstr "Nombre del publicador"

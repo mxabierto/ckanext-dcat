@@ -1,21 +1,29 @@
 import logging
+from slugify import slugify
 
 log = logging.getLogger(__name__)
 
 
-def dcat_to_ckan(dcat_dict):
-
+def dcat_to_ckan(dcat_dict, vocabulary):
     package_dict = {}
 
     package_dict['title'] = dcat_dict.get('title')
     package_dict['notes'] = dcat_dict.get('description')
     package_dict['url'] = dcat_dict.get('landingPage')
 
-
     package_dict['tags'] = []
     for keyword in dcat_dict.get('keyword', []):
         keyword = keyword.replace("'", "").replace('(', "").replace(')',"").replace(',', '').replace('.', '').replace(';', '')
         package_dict['tags'].append({'name': keyword})
+
+    # Nivel de gobierno por medio del vocabulario
+    if dcat_dict.get('govType', False):
+        package_dict['tags'].append({
+            'name': dcat_dict.get('govType').capitalize(),
+            'vocabulary_id': vocabulary
+        })
+
+    package_dict['gov_type'] = dcat_dict.get('govType').capitalize()
 
     package_dict['extras'] = []
     for key in ['issued', 'modified']:
@@ -25,25 +33,70 @@ def dcat_to_ckan(dcat_dict):
 
     dcat_publisher = dcat_dict.get('publisher')
     if isinstance(dcat_publisher, basestring):
+        package_dict['owner_org'] = slugify(dcat_publisher, max_length=100)
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher})
     elif isinstance(dcat_publisher, dict) and dcat_publisher.get('name'):
+        package_dict['owner_org'] = slugify(dcat_publisher.get('name'), max_length=100)
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher.get('name')})
         package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('mbox')})
+        package_dict['extras'].append({'key': 'publisher_type', 'value': dcat_publisher.get('position')})
+
+    if dcat_dict.get('theme'):
+        package_dict['extras'].append({
+            'key': 'theme', 'value': dcat_dict.get('theme').title()
+        })
+
+    package_dict['extras'].append({
+        'key': 'frequency', 'value': dcat_dict.get('accrualPeriodicity', '')
+    })
+
+    if dcat_dict.get('temporal'):
+        start, end = dcat_dict.get('temporal').split('/')
+        package_dict['extras'].append({
+            'key': 'temporal_start', 'value': start
+        })
+        package_dict['extras'].append({
+            'key': 'temporal_end', 'value': end
+        })
+
+    if dcat_dict.get('spatial'):
+        package_dict['extras'].append({
+            'key': 'spatial_text',
+            'value': dcat_dict.get('spatial')
+        })
+
+    if dcat_dict.get('comments'):
+        package_dict['extras'].append({
+            'key': 'version_notes',
+            'value': dcat_dict.get('comments')
+        })
+
+    if dcat_dict.get('dataDictionary'):
+        package_dict['extras'].append({
+            'key': 'dataDictionary',
+            'value': dcat_dict.get('dataDictionary')
+        })
+
+    if dcat_dict.get('quality'):
+        package_dict['extras'].append({
+            'key': 'quality',
+            'value': dcat_dict.get('quality')
+        })
 
     package_dict['extras'].append({
         'key': 'language',
-        'value': ','.join(dcat_dict.get('language', []))
+        'value': dcat_dict.get('language', [])
     })
-
-    package_dict['extras'].append(dcat_dict.get('extras', {}))
 
     package_dict['resources'] = []
     for distribution in dcat_dict.get('distribution', []):
+        mt = distribution.get('mediaType')
+        fr = mt.split('/')[-1] if hasattr(mt, 'split') else ''
         resource = {
             'name': distribution.get('title'),
             'description': distribution.get('description'),
             'url': distribution.get('downloadURL') or distribution.get('accessURL'),
-            'format': distribution.get('format'),
+            'format': fr
         }
 
         if distribution.get('byteSize'):
@@ -53,6 +106,7 @@ def dcat_to_ckan(dcat_dict):
                 pass
         package_dict['resources'].append(resource)
 
+    # print package_dict
     return package_dict
 
 

@@ -10,6 +10,7 @@ _ = toolkit._
 
 log = logging.getLogger(__name__)
 
+DCAT_EXPOSE_SUBCATALOGS = 'ckanext.dcat.expose_subcatalogs'
 
 CONTENT_TYPES = {
     'rdf': 'application/rdf+xml',
@@ -54,6 +55,10 @@ def field_labels():
         'size': _('Size'),
         'rights': _('Rights'),
         'created': _('Created'),
+        'dcat_issued': _('Issued'),
+        'dcat_modified': _('Modified'),
+        'dcat_publisher_email': _('Publisher email'),
+        'dcat_publisher_name': _('Publisher name')
     }
 
 
