@@ -13,7 +13,7 @@ def dcat_to_ckan(dcat_dict, vocabulary):
 
     package_dict['tags'] = []
     for keyword in dcat_dict.get('keyword', []):
-        keyword = keyword.replace("'", "").replace('(', "").replace(')',"").replace(',', '').replace('.', '').replace(';', '')
+        keyword = keyword.replace("'", "").replace('(', "").replace(')',"").replace(',', '').replace('.', '').replace(';', '').replace('/', '')
         package_dict['tags'].append({'name': keyword})
 
     # Nivel de gobierno por medio del vocabulario
