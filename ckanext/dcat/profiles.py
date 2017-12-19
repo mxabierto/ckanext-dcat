@@ -14,7 +14,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -109,11 +109,11 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        If found, the unicode representation is returned, else None
+        If found, the unicode representation is returned, else an empty string
         '''
         for o in self.g.objects(subject, predicate):
             return unicode(o)
-        return None
+        return ''
 
     def _object_value_int(self, subject, predicate):
         '''
@@ -215,7 +215,7 @@ class RDFProfile(object):
         }
 
         Returns keys for uri, name, email, url and type with the values set to
-        None if they could not be found
+        an empty string if they could not be found
         '''
 
         publisher = {}
@@ -223,7 +223,7 @@ class RDFProfile(object):
         for agent in self.g.objects(subject, predicate):
 
             publisher['uri'] = (unicode(agent) if isinstance(agent,
-                                rdflib.term.URIRef) else None)
+                                rdflib.term.URIRef) else '')
 
             publisher['name'] = self._object_value(agent, FOAF.name)
 
@@ -242,7 +242,7 @@ class RDFProfile(object):
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         Returns keys for uri, name and email with the values set to
-        None if they could not be found
+        an empty string if they could not be found
         '''
 
         contact = {}
@@ -250,7 +250,7 @@ class RDFProfile(object):
         for agent in self.g.objects(subject, predicate):
 
             contact['uri'] = (unicode(agent) if isinstance(agent,
-                              rdflib.term.URIRef) else None)
+                              rdflib.term.URIRef) else '')
 
             contact['name'] = self._object_value(agent, VCARD.fn)
 
@@ -316,7 +316,7 @@ class RDFProfile(object):
         '''
         Returns a license identifier if one of the distributions license is
         found in CKAN license registry. If no distribution's license matches,
-        None is returned.
+        an empty string is returned.
 
         The first distribution with a license found in the registry is used so
         that if distributions have different licenses we'll only get the first
@@ -338,12 +338,12 @@ class RDFProfile(object):
             if license:
                 # Try to find a matching license comparing URIs, then titles
                 license_id = license_uri2id.get(license.toPython())
-                if license_id is None:
+                if not license_id:
                     license_id = license_title2id.get(
                         self._object_value(license, DCT.title))
-                if license_id is not None:
+                if license_id:
                     return license_id
-        return None
+        return ''
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
@@ -570,6 +570,36 @@ class RDFProfile(object):
             return result['results'][0]['metadata_modified']
         return None
 
+    def _get_source_catalog(self, dataset_ref):
+        '''
+        Returns Catalog reference that is source for this dataset. 
+
+        Catalog referenced in dct:hasPart is returned, 
+        if dataset is linked there, otherwise main catalog 
+        will be returned.
+
+        This will not be used if ckanext.dcat.expose_subcatalogs
+        configuration option is set to False.
+        '''
+        if not toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+            return
+        catalogs = set(self.g.subjects(DCAT.dataset, dataset_ref))
+        root = self._get_root_catalog_ref()
+        try:
+            catalogs.remove(root)
+        except KeyError:
+            pass
+        assert len(catalogs) in (0, 1,), "len %s" %catalogs
+        if catalogs:
+            return catalogs.pop()
+        return root
+    
+    def _get_root_catalog_ref(self):
+        roots = list(self.g.subjects(DCT.hasPart))
+        if not roots:
+            roots = list(self.g.subjects(RDF.type, DCAT.Catalog))
+        return roots[0]
+
     # Public methods for profiles to implement
 
     def parse_dataset(self, dataset_dict, dataset_ref):
@@ -585,6 +615,26 @@ class RDFProfile(object):
         or `package_update`
         '''
         return dataset_dict
+
+    def _extract_catalog_dict(self, catalog_ref):
+        '''
+        Returns list of key/value dictionaries with catalog
+        '''
+
+        out = []
+        sources = (('source_catalog_title', DCT.title,),
+                   ('source_catalog_description', DCT.description,),
+                   ('source_catalog_homepage', FOAF.homepage,),
+                   ('source_catalog_language', DCT.language,),
+                   ('source_catalog_modified', DCT.modified,),)
+
+        for key, predicate in sources:
+            val = self._object_value(catalog_ref, predicate)
+            if val:
+                out.append({'key': key, 'value': val})
+
+        out.append({'key': 'source_catalog_publisher', 'value': json.dumps(self._publisher(catalog_ref, DCT.publisher))})
+        return out
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         '''
@@ -734,12 +784,19 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (unicode(dataset_ref)
                        if isinstance(dataset_ref, rdflib.term.URIRef)
-                       else None)
+                       else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
         # License
         if 'license_id' not in dataset_dict:
             dataset_dict['license_id'] = self._license(dataset_ref)
+
+        # Source Catalog
+        if toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+            catalog_src = self._get_source_catalog(dataset_ref)
+            if catalog_src is not None:
+                src_data = self._extract_catalog_dict(catalog_src)
+                dataset_dict['extras'].extend(src_data)
 
         # Resources
         for distribution in self._distributions(dataset_ref):
@@ -807,7 +864,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             resource_dict['uri'] = (unicode(distribution)
                                     if isinstance(distribution,
                                                   rdflib.term.URIRef)
-                                    else None)
+                                    else '')
 
             dataset_dict['resources'].append(resource_dict)
 

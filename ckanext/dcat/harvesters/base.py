@@ -13,6 +13,8 @@ from ckan import model
 from ckanext.harvest.harvesters import HarvesterBase
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
+from ckanext.dcat.interfaces import IDCATRDFHarvester
+
 
 log = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ class DCATHarvester(HarvesterBase):
     force_import = False
 
     _user_name = None
+    vocabulary = os.environ.get('VOCABULARY_GOV_TYPE_ID', '910b5e72-2723-466d-a892-4be1e4129120')
 
 
     def _get_content_and_type(self, url, harvest_job, page=1, content_type=None):
@@ -56,12 +59,17 @@ class DCATHarvester(HarvesterBase):
 
 
             log.debug('Getting file %s', url)
+            
+            # get the `requests` session object
+            session = requests.Session()
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                session = harvester.update_session(session)
 
             # first we try a HEAD request which may not be supported
             did_get = False
-            r = requests.head(url)
+            r = session.head(url)
             if r.status_code == 405 or r.status_code == 400:
-                r = requests.get(url, stream=True)
+                r = session.get(url, stream=True)
                 did_get = True
             r.raise_for_status()
 
@@ -74,7 +82,7 @@ class DCATHarvester(HarvesterBase):
                 return None, None
 
             if not did_get:
-                r = requests.get(url, stream=True)
+                r = session.get(url, stream=True)
 
             length = 0
             content = ''
@@ -216,9 +224,10 @@ class DCATHarvester(HarvesterBase):
                 return None
 
             if content and "json" not in content_type:
-                self._save_gather_error("Mal content_type!! {0}".format(content_type), harvest_job)
+                #self._save_gather_error("Mal content_type!! {0}".format(content_type), harvest_job)
                 #self._save_gather_error(content, harvest_job)
-                break
+                #break
+                pass
 
             try:
                 batch_guids = []

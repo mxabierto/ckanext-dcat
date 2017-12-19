@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 from hashlib import sha1
 
@@ -48,6 +49,7 @@ class DCATJSONHarvester(DCATHarvester):
 
         dcat_dict = json.loads(content)
 
-        package_dict = converters.dcat_to_ckan(dcat_dict)
+        vocabulary = self._get_object_extra(harvest_object, 'vocabulary')
+        package_dict = converters.dcat_to_ckan(dcat_dict, vocabulary)
 
         return package_dict, dcat_dict
