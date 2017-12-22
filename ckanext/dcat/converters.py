@@ -17,13 +17,12 @@ def dcat_to_ckan(dcat_dict, vocabulary):
         package_dict['tags'].append({'name': keyword})
 
     # Nivel de gobierno por medio del vocabulario
-    if dcat_dict.get('govType', False):
+    if dcat_dict.get('govType', None) is not None:
         package_dict['tags'].append({
             'name': dcat_dict.get('govType').capitalize(),
             'vocabulary_id': vocabulary
         })
 
-    package_dict['gov_type'] = dcat_dict.get('govType').capitalize()
 
     package_dict['extras'] = []
     for key in ['issued', 'modified']:
